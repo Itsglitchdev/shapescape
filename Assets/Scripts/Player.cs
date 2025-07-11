@@ -27,8 +27,9 @@ public class Player : MonoBehaviour
         }
     }
 
-    void OnEnable() {
-        GameManager.OnShapeChangeRequested += ChangeShape;    
+    void OnEnable()
+    {
+        GameManager.OnShapeChangeRequested += ChangeShape;
     }
 
     void OnDisable()
@@ -39,16 +40,19 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(GameManager.isGameStarted == false) return;
         Move();
     }
 
     void Move()
     {
-        rb.MovePosition(transform.position + transform.forward * moveSpeed * Time.deltaTime ); ;
+        rb.MovePosition(transform.position + transform.forward * moveSpeed * Time.deltaTime); ;
     }
 
     void ChangeShape(int shapeIndex)
     {
+        if(GameManager.isGameStarted == false) return;
+
         if (isShifting || shapeIndex == currentShapeIndex || shapeIndex < 0 || shapeIndex > playerShapes.Length)
         {
             return;
@@ -57,8 +61,9 @@ public class Player : MonoBehaviour
         StartCoroutine(SwitchShapeSmoothly(shapeIndex));
     }
 
-    IEnumerator SwitchShapeSmoothly(int shapeIndex) { 
-        
+    IEnumerator SwitchShapeSmoothly(int shapeIndex)
+    {
+
         if (isShifting || shapeIndex == currentShapeIndex)
             yield break;
 
@@ -71,7 +76,7 @@ public class Player : MonoBehaviour
         Vector3 toScale = originalScales[shapeIndex];
 
 
-        for (float t = 0f; t < 1f; t += Time.deltaTime * 4f)
+        for (float t = 0f; t < 1f; t += Time.deltaTime * 5f)
         {
             currentShape.transform.localScale = Vector3.Lerp(fromScale, Vector3.zero, t);
             yield return null;
@@ -82,7 +87,7 @@ public class Player : MonoBehaviour
         targetShape.transform.localScale = Vector3.zero;
         targetShape.SetActive(true);
 
-        for (float t = 0; t < 1; t += Time.deltaTime * 4f)
+        for (float t = 0; t < 1; t += Time.deltaTime * 5f)
         {
             targetShape.transform.localScale = Vector3.Lerp(Vector3.zero, toScale, t);
             yield return null;
@@ -92,4 +97,33 @@ public class Player : MonoBehaviour
         currentShapeIndex = shapeIndex;
         isShifting = false;
     }
+
+    void OnTriggerEnter(Collider other)
+    {
+        string gateTag = other.tag;
+        // Debug.Log("Player entered " + gateTag);
+        string gateShape = gateTag.Replace("Gate", "");
+        // Debug.Log("Gate shape: " + gateShape);
+        string currentShapeTag = playerShapes[currentShapeIndex].tag;
+        // Debug.Log("Player shape: " + currentShapeTag);
+        if (gateShape != currentShapeTag)
+        {
+            Debug.Log("Wrong shape! Falling...");
+            rb.useGravity = true; // turn gravity ON
+
+            rb.AddForce(Vector3.down * 5f, ForceMode.VelocityChange);
+            GameManager.isGameStarted = false;
+        }
+        else
+        {
+            Debug.Log("Correct shape: " + currentShapeTag);
+            GameManager.instance.AddScore(10); 
+            Destroy(other.gameObject, 2f);
+            // Do nothing, allow passing
+        }
+
+    }
+
+
+
 }
