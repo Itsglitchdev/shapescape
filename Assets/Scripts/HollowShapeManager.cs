@@ -24,10 +24,19 @@ public class HollowShapeManager : MonoBehaviour
         initialSpawnDone = true;
     }
 
+    void OnEnable()
+    {
+        GameManager.OnHollowShapeVisibilityChanged += HandleVisibility;
+    }
+
+    void OnDisable()
+    {
+        GameManager.OnHollowShapeVisibilityChanged -= HandleVisibility;
+    }
 
     void Update()
     {
-        if(GameManager.isGameStarted == false) return;
+        if (GameManager.isGameStarted == false) return;
 
         if (initialSpawnDone && holeShapePositionZ < roadManager.GetRoadEndZ())
         {
@@ -35,7 +44,6 @@ public class HollowShapeManager : MonoBehaviour
             InitializeHollowShape(randomCount);
         }
     }
-
 
     void InitializeHollowShape(int count)
     {
@@ -46,11 +54,11 @@ public class HollowShapeManager : MonoBehaviour
             {
                 return;
             }
-            
+
             int randomHoleShapeIndex = Random.Range(0, HollowShapePrefabs.Length);
             GameObject prefab = HollowShapePrefabs[randomHoleShapeIndex];
             Vector3 postion = new Vector3(0, 0, holeShapePositionZ);
-            GameObject holeObject = Instantiate(prefab, postion, prefab.transform.rotation ,transform);
+            GameObject holeObject = Instantiate(prefab, postion, prefab.transform.rotation, transform);
             HollowShape.Add(holeObject);
             holeShapePositionZ += gapBetweenTwoShapesHoles;
 
@@ -58,7 +66,12 @@ public class HollowShapeManager : MonoBehaviour
 
     }
 
-
+    private void HandleVisibility(bool isVisible)
+    {
+        foreach (GameObject h in HollowShape)
+            h.SetActive(isVisible);
+    }
+    
 
 
 }

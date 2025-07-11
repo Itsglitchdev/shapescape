@@ -23,26 +23,41 @@ public class Player : MonoBehaviour
         {
             originalScales[i] = playerShapes[i].transform.localScale;
             playerShapes[i].SetActive(i == currentShapeIndex);
-
         }
+
     }
 
     void OnEnable()
     {
         GameManager.OnShapeChangeRequested += ChangeShape;
+        GameManager.OnPlayerVisibilityChanged += HandleVisibility;
+
     }
 
     void OnDisable()
     {
         GameManager.OnShapeChangeRequested -= ChangeShape;
+        GameManager.OnPlayerVisibilityChanged -= HandleVisibility;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(GameManager.isGameStarted == false) return;
+        if (GameManager.isGameStarted == false) return;
         Move();
     }
+
+    void HandleVisibility(bool isVisible)
+    {
+        for (int i = 0; i < playerShapes.Length; i++)
+        {
+            playerShapes[i].SetActive(isVisible && i == currentShapeIndex);
+        }
+
+        // GetComponent<Collider>().enabled = isVisible;
+        rb.useGravity = false; 
+    }
+
 
     void Move()
     {
@@ -51,7 +66,7 @@ public class Player : MonoBehaviour
 
     void ChangeShape(int shapeIndex)
     {
-        if(GameManager.isGameStarted == false) return;
+        if (GameManager.isGameStarted == false) return;
 
         if (isShifting || shapeIndex == currentShapeIndex || shapeIndex < 0 || shapeIndex > playerShapes.Length)
         {
@@ -110,20 +125,19 @@ public class Player : MonoBehaviour
         {
             Debug.Log("Wrong shape! Falling...");
             rb.useGravity = true; // turn gravity ON
-
             rb.AddForce(Vector3.down * 5f, ForceMode.VelocityChange);
-            GameManager.isGameStarted = false;
+            // GameManager.isGameStarted = false;
+            GameManager.instance.OnGameOver();
         }
         else
         {
             Debug.Log("Correct shape: " + currentShapeTag);
-            GameManager.instance.AddScore(10); 
+
+            GameManager.instance.AddScore(10);
             Destroy(other.gameObject, 2f);
-            // Do nothing, allow passing
         }
 
     }
-
-
+    
 
 }

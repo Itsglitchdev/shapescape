@@ -21,9 +21,19 @@ public class RoadManager : MonoBehaviour
         InitializeRoads();
     }
 
+    void OnEnable()
+    {
+        GameManager.OnPlayerVisibilityChanged += HandleVisibility;
+    }
+
+    void OnDisable()
+    {
+        GameManager.OnPlayerVisibilityChanged -= HandleVisibility;
+    }
+
     void Update()
-    {   
-        if(GameManager.isGameStarted == false) return;
+    {
+        if (GameManager.isGameStarted == false) return;
 
         GetRoadEndZ();
 
@@ -60,7 +70,15 @@ public class RoadManager : MonoBehaviour
             }
         }
     }
-    
+
+    void HandleVisibility(bool isVisible)
+    {
+        foreach (GameObject road in activePieces)
+        {
+            road.SetActive(isVisible);
+        }
+    }
+
     public float GetRoadEndZ()
     {
         // Debug.Log(roadPositionZ);
