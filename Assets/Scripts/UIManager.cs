@@ -51,6 +51,23 @@ public class UIManager : MonoBehaviour
         SetInitialUIState();
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            GameManager.OnShapeChangeRequested?.Invoke(0);
+        }
+        else if (Input.GetKeyDown(KeyCode.R))
+        {
+            GameManager.OnShapeChangeRequested?.Invoke(1); 
+        }
+        else if (Input.GetKeyDown(KeyCode.C))
+        {
+            GameManager.OnShapeChangeRequested?.Invoke(2); 
+        }
+    }
+
+
     void ButtonClickHandle()
     {
         squareShapeButton.onClick.AddListener(() => GameManager.OnShapeChangeRequested?.Invoke(0));

@@ -12,8 +12,8 @@ public class HollowShapeManager : MonoBehaviour
     [Header("Road Reference")]
     [SerializeField] private RoadManager roadManager;
 
-    private float holeShapePositionZ = 30f;
-    private float gapBetweenTwoShapesHoles = 20f;
+    private float holeShapePositionZ = 70f;
+    private float gapBetweenTwoShapesHoles = 25f;
     private List<GameObject> HollowShape = new List<GameObject>();
 
     private bool initialSpawnDone = false;

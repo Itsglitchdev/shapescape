@@ -4,7 +4,10 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float maxSpeed = 20f;
+    [SerializeField] private float accelerationDuration = 5f;
+
 
     [Header("PlayerShapes")]
     [SerializeField] private GameObject[] playerShapes;
@@ -17,6 +20,7 @@ public class Player : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        moveSpeed = 0f; 
 
         originalScales = new Vector3[playerShapes.Length];
         for (int i = 0; i < playerShapes.Length; i++)
@@ -24,11 +28,12 @@ public class Player : MonoBehaviour
             originalScales[i] = playerShapes[i].transform.localScale;
             playerShapes[i].SetActive(i == currentShapeIndex);
         }
-
+        
     }
 
     void OnEnable()
     {
+        GameManager.OnGamePlayed += StartAcceleration;
         GameManager.OnShapeChangeRequested += ChangeShape;
         GameManager.OnPlayerVisibilityChanged += HandleVisibility;
 
@@ -36,6 +41,7 @@ public class Player : MonoBehaviour
 
     void OnDisable()
     {
+        GameManager.OnGamePlayed -= StartAcceleration;
         GameManager.OnShapeChangeRequested -= ChangeShape;
         GameManager.OnPlayerVisibilityChanged -= HandleVisibility;
     }
@@ -62,6 +68,27 @@ public class Player : MonoBehaviour
     void Move()
     {
         rb.MovePosition(transform.position + transform.forward * moveSpeed * Time.deltaTime); ;
+    }
+
+    void StartAcceleration()
+    {
+        StartCoroutine(AcceleratePlayer());
+    }
+
+
+    IEnumerator AcceleratePlayer()
+    {
+        float elapsed = 0f;
+
+        while (elapsed < accelerationDuration)
+        {
+            moveSpeed = Mathf.Lerp(0f, maxSpeed, elapsed / accelerationDuration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        moveSpeed = maxSpeed;
+
     }
 
     void ChangeShape(int shapeIndex)
@@ -131,7 +158,7 @@ public class Player : MonoBehaviour
         }
         else
         {
-            Debug.Log("Correct shape: " + currentShapeTag);
+            // Debug.Log("Correct shape: " + currentShapeTag);
 
             GameManager.instance.AddScore(10);
             Destroy(other.gameObject, 2f);
